@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-@ad=u4bmn64hxn8jdix^l%!5+d0q!i4s__b()(4^!yepzodggk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [] 
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
 
 
 # Application definition
@@ -137,3 +138,6 @@ EMAIL_PORT = 587 # e.g. 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'ajoy.notun@gmail.com' # e.g. your_name@gmail.com
 EMAIL_HOST_PASSWORD = 'xntxmmmgovperpix' # e.g. your_password
+
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
