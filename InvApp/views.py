@@ -78,7 +78,7 @@ class indexView(TemplateView):
 
 
 def all_Notice(request):
-    context = {'notices': Notice.objects.all()}
+    context = {'notices': Notice.objects.all().order_by("-id")}
     # context['habijabi'] = Notice.objects.all()
     return render(request, 'notice/allnotice.html', context)
 
@@ -170,8 +170,6 @@ class CreateRoutine(AdminRequiredMixin, View):
 
     def get(self, request, semester_name):
         semester = Semester.objects.get(semester_name=semester_name)
-        print(semester)
-        print(semester.courses.all())
         form = RoutineCreationForm(semester_name=semester_name)
         return render(request, 'create/create_routine.html', {'semester': semester, 'form': form, "sem_object": Semester.objects.all(), 'semester_name': semester_name})
 
@@ -184,7 +182,6 @@ class CreateRoutine(AdminRequiredMixin, View):
             semester.routine = routine
             semester.save()
             return redirect('index')
-        print(Semester.objects.all())
         return render(request, 'inv/create_routine.html', {'semester': semester,
                                                            'form': form, "sem_object": Semester.objects.all()})
 
