@@ -15,7 +15,12 @@
       <h4 class="card-title">Description:</h4>
       <p class="card-text">{{notice.description}}</p>
       <h4 class="card-title">Image:</h4>
+      {% if notice.image %}
       <img src="{{ notice.image.url }}" alt="{{ notice.title }}" width="100%" height="330px">
+      {% else %}
+      <img src="{% static 'images/default-image.jpg' %}" alt="Default Image"
+        class="bd-placeholder-img card-img-top" width="100%" height="330px">
+      {% endif %}
     </div>
   </div>
 

@@ -1,3 +1,4 @@
+from itertools import chain
 from django import forms
 from .models import Student, Teacher, Notice
 
@@ -137,9 +138,18 @@ class noticeBuildForm(forms.ModelForm):
 class RoutineCreationForm(forms.ModelForm):
     teachers_count = Exam.teachers.through.objects.values('teacher').annotate(count=Count('teacher')).filter(count__lt=3).order_by('count')
     teacher_ids = [item['teacher'] for item in teachers_count]
-    teachers_queryset = Teacher.objects.filter(id__in=teacher_ids)
+    # teachers_queryset = Teacher.objects.filter(id__in=teacher_ids)
+    # all_teachers_queryset = Teacher.objects.all()
+    # final_queryset = teachers_queryset.union(all_teachers_queryset).distinct()
+    teacher_qs = Teacher.objects.filter(id__in=teacher_ids)
+    all_teachers_qs = Teacher.objects.all()
+
+    merged_qs = list(chain(teacher_qs, all_teachers_qs))
+    unique_teachers_qs = Teacher.objects.filter(id__in=[teacher.id for teacher in merged_qs])
+
+    
     teachers = forms.ModelMultipleChoiceField(
-        queryset=teachers_queryset,  # add comma here
+        queryset=unique_teachers_qs,  # add comma here
         widget=forms.CheckboxSelectMultiple
     )
     def __init__(self, *args, **kwargs):
@@ -204,32 +214,31 @@ class RoutineForm(forms.ModelForm):
     )
     class Meta:
         model = Routine
-        fields = ['exams', 'semsester']
+        fields = ['exams', 'semester']
         labels = {
             'exams': 'Exam Name',
-            'semsester': 'Name the Semester',
+            'semester': 'Name the Semester',
         }
 
         widgets = {
             'exams': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'semsester': forms.TextInput(attrs={'class': 'form-control',}),
+            'semester': forms.Select(attrs={'class': 'form-control',}),
         }
 
 class SemesterForm(forms.ModelForm):
-    course_list = Exam.objects.all()
+    course_list = Course.objects.all()  # use Course queryset instead of Exam queryset
     courses = forms.ModelMultipleChoiceField(
-        queryset=course_list,  # add comma here
+        queryset=course_list,
         widget=forms.CheckboxSelectMultiple
     )
     class Meta:
         model = Semester
-        fields = ['semester_name', 'student_number', 'courses', 'chairman', 'final_routine']
+        fields = ['semester_name', 'student_number', 'courses', 'chairman']
         labels = {
             'semester_name': 'Semester Name',
             'student_number': 'Student Number',
             'courses': 'Courses of Semester',
             'chairman': 'Select The Chairman',
-            'final_routine': 'Final Routine',
         }
 
         widgets = {
@@ -237,8 +246,9 @@ class SemesterForm(forms.ModelForm):
             'student_number': forms.NumberInput(attrs={'class': 'form-control',}),
             'courses': forms.SelectMultiple(attrs={'class': 'form-control',}),
             'chairman': forms.Select(attrs={'class': 'form-control',}),
-            'final_routine': forms.Select(attrs={'class': 'form-control',}),
         }
+
+
 
 
 # Notice form

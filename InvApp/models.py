@@ -83,23 +83,21 @@ class Exam(models.Model):
         return self.subject.course_name
 
 
-class Routine (models.Model):
-    exams = models.ManyToManyField(Exam, null=True)
-    semsester = models.CharField(max_length=50, null=True)
-
-    def __str__(self):
-        return str(self.semester)
-
-
 class Semester (models.Model):
     semester_name = models.CharField(null=True, max_length=200)
     student_number = models.PositiveIntegerField()
     courses = models.ManyToManyField(Course, null=True)
     chairman = models.OneToOneField(
         Teacher, on_delete=models.CASCADE, null=True)
-    final_routine = models.OneToOneField(
-        Routine, on_delete=models.CASCADE, null=True)
-
     def __str__(self):
         return str(self.semester_name)
+    
+class Routine (models.Model):
+    exams = models.ManyToManyField(Exam, null=True)
+    semester = models.OneToOneField(Semester,on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return str(self.semester)
+
+
 

@@ -53,6 +53,7 @@ def delete_notice(request, id):
 
     context = {'notice': notice}
     return render(request, 'inv/notice_confirm_delete.html', context)
+
 class SemesterCreateView(AdminRequiredMixin,CreateView):
     template_name = 'create/semester_form.html'
     form_class = SemesterForm
@@ -134,20 +135,33 @@ class SemesterDetailView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, {'semester_list': semester_list})
 
 
-class EachSemesterView(LoginRequiredMixin, TemplateView):
+class EachSemesterView(LoginRequiredMixin, DetailView):
     login_url = 'stu_login'
+    model = Semester
+    template_name = 'inv/view_semester.html'
+    context_object_name = 'semester'
+    def get_object(self, queryset=None):
+        semester_name = self.kwargs['semester_name']
+        return get_object_or_404(Semester, semester_name=semester_name)
 
-    def get(self, request, semester_name):
-        semester = Semester.objects.get(semester_name=semester_name)
-        final_routine = semester.final_routine
-        selected_exams = final_routine.exams.all()
-        print(selected_exams)
-        selected_teachers = Teacher.objects.filter(exam__in=selected_exams)
-        print(selected_teachers)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        semester = self.object
+        routine = get_object_or_404(Routine, semester=semester)
+        selected_exams = routine.exams.all()
+        context['exams'] = selected_exams
+        return context
+    # def get(self, request, semester_name):
+    #     semester = Semester.objects.get(semester_name=semester_name)
+    #     final_routine = semester.final_routine
+    #     selected_exams = Routine.exams.all()
+    #     print(selected_exams)
+    #     selected_teachers = Teacher.objects.filter(exam__in=selected_exams)
+    #     print(selected_teachers)
 
-        print(semester)
-        return render(request, 'inv/view_semester.html',
-                      {'semester_name': semester_name, "semester": Semester.objects.all(), 'exams': selected_exams, 'teachers': selected_teachers})
+    #     print(semester)
+    #     return render(request, 'inv/view_semester.html',
+    #                   {'semester_name': semester_name, "semester": Semester.objects.all(), 'exams': selected_exams, 'teachers': selected_teachers})
 
 
 class CommitteListView(LoginRequiredMixin, TemplateView):
@@ -182,7 +196,7 @@ class CreateRoutine(AdminRequiredMixin, View):
             semester.routine = routine
             semester.save()
             return redirect('index')
-        return render(request, 'inv/create_routine.html', {'semester': semester,
+        return render(request, 'create/create_routine.html', {'semester': semester,
                                                            'form': form, "sem_object": Semester.objects.all()})
 
 
